@@ -1,0 +1,10 @@
+{
+  "name": "world-editor",
+  "version": "0.0.1",
+  "author": "David Overcash <funnylookinhat@gmail.com>",
+  "description": "Three.JS World Editor",
+  "private": true,
+  "dependencies": {
+    "express": "3.x"
+  } 
+}
