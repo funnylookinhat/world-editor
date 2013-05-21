@@ -117,7 +117,22 @@ function init() {
 		wireframe: true
 	});
 
-	var mapMesh = new THREE.Mesh(mapGeometry,mapMaterial);
+	var uniforms = {
+		heightmap: { type: "t", value: THREE.ImageUtils.loadTexture('/storage/height-test-small.png') },
+		textureRepeat: {
+			type: 'f',
+			value: 1
+		}
+	};
+	
+	var terrainMaterial = new THREE.ShaderMaterial({
+		uniforms: uniforms,
+		vertexShader: document.getElementById( 'testVertexShader' ).textContent,
+		fragmentShader: document.getElementById( 'testFragmentShader' ).textContent
+	});
+
+
+	var mapMesh = new THREE.Mesh(mapGeometry,terrainMaterial);
 
 	mapMesh.position.set(0,0,0);
 	

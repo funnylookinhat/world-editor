@@ -5,6 +5,33 @@
 	</head>
 	<body>
 		<div id="render"></div>
+
+		<script id="testVertexShader" type="x-shader/x-fragment">
+		    varying vec2 vUv;
+		    varying vec3 vPosition;
+		    void main( void ) {
+		        vUv = uv;
+		        vPosition = position;
+		        gl_Position = projectionMatrix * modelViewMatrix * vec4(vPosition, 1.0);
+		    }
+		</script>
+		<script id="testFragmentShader" type="x-shader/x-vertex">
+		    uniform sampler2D heightmap;
+		    varying vec2 vUv;
+		    varying vec3 vPosition;
+		    vec4 color;
+		    void main() {
+		        color = vec4(0.0, 0.0, 0.0, 0.6);
+		        vec4 diffuseHeight = texture2D( heightmap, vUv );
+		        color = mix(color, vec4(0.0,0.4,0.0,diffuseHeight.r), 1.0);
+		        gl_FragColor = color;
+		        /*
+		        color = vec4(0.0, 0.0, 0.0, 1.0);
+		        gl_FragColor = color;
+		        */
+		    }
+		</script>
+
 		<script type="text/javascript" src="/js/includes/jquery.min.js"></script>
 		<script type="text/javascript" src="/js/includes/three.js"></script>
 		<script type="text/javascript" src="/js/includes/stats.min.js"></script>
