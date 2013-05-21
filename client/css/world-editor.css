@@ -1,0 +1,27 @@
+/**
+ * World Editor CSS
+ */
+
+* {
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	outline: none;
+	font-family: "Arial";
+}
+
+html, body {
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+	background: #e0e0e0;
+}
+
+#render > canvas {
+	z-index: 1;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	background: #d0d0d0;
+}
