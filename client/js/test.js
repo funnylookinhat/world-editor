@@ -29,6 +29,69 @@ var mapWidth = 0;
 var mapHeight = 0;
 
 var heightImage = new Image;
+
+function imageLoaded(image) {
+	console.log('TYPE: '+typeof image);
+	cvs.width = image.width;
+	cvs.height = image.height;
+	ctx.drawImage( image, 0, 0);
+	var heightDataW = image.width;
+	var heightDataH = image.height;
+	var heightData = ctx.getImageData(0,0,heightDataW,heightDataH);
+	var heightDataRGBA = heightData.data;
+
+	// Loop Pixels
+	var pixelLength = heightDataW * heightDataH * 4;
+	var r, g, b, a;
+	var min = false;
+	var max = false;
+	var total = 0;
+	console.log(heightDataRGBA.length+' =?= '+pixelLength);
+	for( var pixel = 0; pixel < pixelLength; pixel += 4 ) {
+		r = heightDataRGBA[ pixel + 0 ];
+		g = heightDataRGBA[ pixel + 1 ];
+		b = heightDataRGBA[ pixel + 2 ];
+		a = heightDataRGBA[ pixel + 3 ];
+		mapData.push(
+			r +
+			g +
+			b + 
+			a
+		);
+		if( min == false ||
+			min > mapData[mapData.length - 1] ) {
+			min = mapData[mapData.length - 1];
+		}
+		if( max == false ||
+			max < mapData[mapData.length - 1] ) {
+			max = mapData[mapData.length - 1];
+		}
+		total += mapData[mapData.length - 1];
+	}
+
+	var average = total / ( heightDataW * heightDataH );
+
+	// Normalize
+	for( i in mapData ) {
+		mapData[i] = mapData[i] - average;
+	}
+
+	console.log("Min Value: "+min);
+	console.log("Max Value: "+max);
+	console.log("Avg Value: "+average);
+
+	mapWidth = heightDataW;
+	mapHeight = heightDataH;
+
+	init();
+}
+
+heightImage.onload = imageLoaded(this);
+/*(function() {
+	imageLoaded(heightImage);
+});*/
+
+/*
 heightImage.onload = function() {
 	cvs.width = heightImage.width;
 	cvs.height = heightImage.height;
@@ -83,6 +146,7 @@ heightImage.onload = function() {
 
 	init();
 }
+*/
 
 var cameraDelta = -1;
 
@@ -131,8 +195,10 @@ function init() {
 		fragmentShader: document.getElementById( 'testFragmentShader' ).textContent
 	});
 
-
-	var mapMesh = new THREE.Mesh(mapGeometry,terrainMaterial);
+	// Wireframe
+	var mapMesh = new THREE.Mesh(mapGeometry,mapMaterial);
+	// Shader
+	// var mapMesh = new THREE.Mesh(mapGeometry,terrainMaterial);
 
 	mapMesh.position.set(0,0,0);
 	
