@@ -26,7 +26,7 @@ var cameraDelta = -0.05;
 
 var terrainmesh;
 
-var a = 1;
+var a = 0.01;
 
 function render() {
 	camera.position.x += cameraDelta;
@@ -40,6 +40,7 @@ function render() {
 	}
 	*/
 	// camera.position.y += ( cameraDelta / 10 );
+	camera.position.y = 2;
 
 	if( camera.position.x < ( -0.5 * terrainMap.width() &&
 		cameraDelta < 0 ) ) {
@@ -81,9 +82,18 @@ function render() {
 		terrainMap.setHeight(x,z,y);
 //		terrainmesh.geometry.vertices[i].y = y;
 	}
-	terrainmesh.geometry.verticesNeedUpdate = true;
-	a += 0.1;
-	console.log(y);
+	
+	// Regular PlaneGeometry
+	//terrainMap._geometry.verticesNeedUpdate = true;
+	
+
+	terrainMap._geometry.attributes.position.needsUpdate = true;
+	terrainMap._geometry.attributes.index.needsUpdate = true;
+	terrainMap._geometry.attributes.normal.needsUpdate = true;
+	terrainMap._geometry.attributes.uv.needsUpdate = true;
+
+	terrainMap._geometry.computeBoundingSphere();
+	a += 0.01;
 	
 }
 

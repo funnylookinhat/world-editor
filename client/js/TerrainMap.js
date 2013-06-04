@@ -319,8 +319,8 @@ THREE.TerrainMap.prototype.height = function (x,z) {
 }
 
 THREE.TerrainMap.prototype.setHeight = function(x,z,y) {
+	this._heightMap[x + z * this._widthVertices] = y;
 	var positions = this._geometry.attributes.position.array;
 	var index = ( x + z * this._widthVertices ) * 3;
 	positions[index + 1] = this._heightMap[x + z * this._widthVertices];
-	//this._geometry.computeBoundingSphere();
 }
