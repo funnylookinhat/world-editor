@@ -8,7 +8,7 @@ var camera = new THREE.PerspectiveCamera(
   45,
   SCREEN_WIDTH / SCREEN_HEIGHT,
   1,
-  5000
+  100
 );
 
 var renderer = new THREE.WebGLRenderer({
@@ -148,8 +148,8 @@ window.requestAnimFrame = (function(){
 
 // Start
 var terrainMap = new THREE.TerrainMap({
-	width: 1000,
-	depth: 1000
+	width: 2000,
+	depth: 2000
 });
 terrainMap.initFlat(init);
 //terrainMap.initWithImage("/storage/height-test-small.png",[0.1,0.1,0.1,0.1],init);

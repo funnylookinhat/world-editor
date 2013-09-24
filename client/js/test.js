@@ -86,12 +86,12 @@ function imageLoaded(image) {
 	init();
 }
 
-heightImage.onload = imageLoaded(this);
+//heightImage.onload = imageLoaded(heightImage);
 /*(function() {
 	imageLoaded(heightImage);
 });*/
 
-/*
+
 heightImage.onload = function() {
 	cvs.width = heightImage.width;
 	cvs.height = heightImage.height;
@@ -140,13 +140,14 @@ heightImage.onload = function() {
 	console.log("Min Value: "+min);
 	console.log("Max Value: "+max);
 	console.log("Avg Value: "+average);
+	console.log("Dimensions: "+heightDataW+'x'+heightDataH);
 
 	mapWidth = heightDataW;
 	mapHeight = heightDataH;
 
 	init();
 }
-*/
+
 
 var cameraDelta = -1;
 
