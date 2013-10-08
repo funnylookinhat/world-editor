@@ -68,7 +68,7 @@ function render() {
 
 function init() {
 	
-	terrainMap = new TerrainMap({
+	terrainMap = new THREE.TerrainMap({
 		width: mapWidth,
 		depth: mapDepth,
 		levels: 3

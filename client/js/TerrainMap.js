@@ -159,7 +159,8 @@ THREE.TerrainMap.prototype._initGeometry = function (callback) {
 	var triangles = ( this._widthVertices - 1 ) * ( this._depthVertices - 1 ) * 2;
 
 	this._geometry = new THREE.BufferGeometry();
-	this._geometry.dynamic = true;
+	// SLOW SLOW SLOW
+	//this._geometry.dynamic = true;
 	this._geometry.attributes = {
 		index: {
 			itemSize: 1,

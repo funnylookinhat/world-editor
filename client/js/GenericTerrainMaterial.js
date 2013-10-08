@@ -37,6 +37,8 @@ THREE.GenericTerrainMaterial = function (parameters) {
 		delta: 15
 	});
 
+	this._textureRepeat = parameters.textureRepeat ? parameters.textureRepeat : 10;
+
 	this._mixHeight = 10;
 }
 
@@ -95,7 +97,7 @@ THREE.GenericTerrainMaterial.prototype.generateMaterial = function () {
 	}
 	uniforms.textureRepeat = {
 		type: 'f',
-		value: 1000
+		value: this._textureRepeat	// PASS THIS AS A PARAM
 	};
 	for( i in uniforms ) {
 		if( uniforms[i].type == "t" ) {

@@ -4,6 +4,7 @@ document.getElementById('render').appendChild(canvas);
 var SCREEN_WIDTH = window.innerWidth;
 var SCREEN_HEIGHT = window.innerHeight;
 var scene = new THREE.Scene();
+scene.fog = new THREE.Fog( 0xff0000 , 5, 1000 );
 var camera = new THREE.PerspectiveCamera(
   45,
   SCREEN_WIDTH / SCREEN_HEIGHT,
@@ -119,6 +120,7 @@ function init() {
 	
 	scene.add(terrainmesh);
 
+
 	camera.position.set(
 		Math.floor(terrainMap.width() * 0.5),
 		5,//\\Math.floor(terrainMap.width() * 0.3) + Math.floor(terrainMap.depth() * 0.3),
@@ -148,8 +150,8 @@ window.requestAnimFrame = (function(){
 
 // Start
 var terrainMap = new THREE.TerrainMap({
-	width: 2000,
-	depth: 2000
+	width: 3000,
+	depth: 3000
 });
 terrainMap.initFlat(init);
 //terrainMap.initWithImage("/storage/height-test-small.png",[0.1,0.1,0.1,0.1],init);
