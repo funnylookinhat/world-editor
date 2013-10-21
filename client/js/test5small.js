@@ -1,9 +1,4 @@
 // Boring Stuff
-
-if( typeof useWorkers == "undefined" ) {
-  var useWorkers = false;
-}
-
 var canvas = document.createElement('canvas');
 document.getElementById('render').appendChild(canvas);
 var SCREEN_WIDTH = window.innerWidth;
@@ -13,7 +8,7 @@ var camera = new THREE.PerspectiveCamera(
   45,
   SCREEN_WIDTH / SCREEN_HEIGHT,
   1,
-  1000
+  2000
 );
 
 
@@ -30,7 +25,7 @@ renderer.autoClearColor = false;
 var cameraShift = 0;
 var cameraCheck = false;
 var cameraDelta = 0.5;//-0.5;
-var cameraY = 100;
+var cameraY = 150;
 
 var cameraCycle = 2;
 var cameraAngle = 0;
@@ -41,7 +36,7 @@ function render() {
   
   cameraShift += Math.abs(cameraDelta*2);
   if( ! cameraCheck &&
-  		cameraShift > 100 ) {
+  		cameraShift > 50 ) {
   	cameraCheck = true;
   	terrainMap.checkGeometry(function() {
       cameraShift = 0;
@@ -64,8 +59,8 @@ function render() {
   } else {
     if( cameraAngle < ( Math.PI * 2 ) ) {
       cameraAngle += cameraDelta * 0.01;
-      camera.position.x = Math.sin(cameraAngle) * terrainMap.width() * 0.8;
-      camera.position.z = Math.cos(cameraAngle) * terrainMap.width() * 0.8;
+      camera.position.x = Math.sin(cameraAngle) * terrainMap.width() * 0.7;
+      camera.position.z = Math.cos(cameraAngle) * terrainMap.width() * 0.7;
       camera.lookAt({x:0,y:0,z:0});
     } else {
       cameraCycle = 1;
@@ -133,25 +128,17 @@ material = new THREE.MeshBasicMaterial({
   wireframe: true
 });
 */
-
-if( typeof debugMode == "undefined" ) {
-  var debugMode = false;
-}
-
 // Start
 var terrainMap = new THREE.DynamicTerrainMap();
 terrainMap.init({
   scene: scene,
   camera: camera,
   material: material,
-  imageUrl: 'storage/height-test-500.png',
-  imageScale: 0.05,
-  flatWidth: 200,
-  flatDepth: 200,
-  position: {x: 0, y: 0, z: 0},
-  debugMode: debugMode,
-  useWorkers: useWorkers ? true : false
+  imageUrl: 'storage/height-test-small.png',
+  imageScale: 0.1,
+  flatWidth: 500,
+  flatDepth: 500,
+  position: {x: 0, y: 0, z: 0}
 },init);
 
-//terrainMap.initWithImage("/storage/height-test-small.png",[0.1,0.1,0.1,0.1],init);
 

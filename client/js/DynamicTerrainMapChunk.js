@@ -4,6 +4,8 @@
  */
 
 THREE.DynamicTerrainMapChunk = function () {
+  this._mapIndex = null;
+  this._buildChunkGeometry = null;
   this._width = null;
   this._depth = null;
   this._position = null;
@@ -16,6 +18,7 @@ THREE.DynamicTerrainMapChunk = function () {
   this._material = null;
   this._camera = null;
   this._scene = null;
+  this._useWorkers = false;
 
   this._geometry = null;
   this._mesh = null;
@@ -25,9 +28,9 @@ THREE.DynamicTerrainMapChunk = function () {
 }
 
 THREE.DynamicTerrainMapChunk.detailRanges = [
-	250,	// Everything <= 250 = 1:1
-	1000,	// 500 < x <= 1000 = 1:2
-  2000// Default then becomes 1:16 over 4000
+	150,
+  250,
+  1000
 ];
 
 THREE.DynamicTerrainMapChunk.prototype = {
@@ -56,6 +59,7 @@ THREE.DynamicTerrainMapChunk.prototype = {
       return;
     }
 
+    this._mapIndex = options.mapIndex.toString ? options.mapIndex : null;
     this._width = options.width.toString ? options.width : null;
     this._depth = options.depth.toString ? options.depth : null;
     this._heightMap = options.heightMap.toString ? options.heightMap : null;
@@ -67,26 +71,19 @@ THREE.DynamicTerrainMapChunk.prototype = {
     this._material = options.material.toString ? options.material : null;
     this._camera = options.camera.toString ? options.camera : null;
     this._scene = options.scene.toString ? options.scene : null;
+    this._buildChunkGeometry = options.buildChunkGeometry;
+    this._useWorkers = options.useWorkers ? true : false;
 
     this._position = options.position.toString ? options.position : {x:0,y:0,z:0};
 
-    this._chunkWorker = new Worker('/js/DynamicTerrainMapChunkWorker.js');
-    this._chunkWorkerReady = false;
-    var self = this;
-    this._chunkWorker.onmessage = function (e) {
-      self._chunkWorkerCallback(e,self);
-    }
+    // console.log("CREATING CHUNK AT "+this._position.x+','+this._position.z+' WITH ZEROS '+this._heightMapWidthZero+','+this._heightMapDepthZero);
+
     // Check if any null?
-    
     this.checkGeometry();
   },
 
-  // THIS WORKS???
-  _chunkWorkerCallback: function(e, self) {
-    console.log('RECEIVING '+self._position.x+','+self._position.z);
-    var newGeometry = e.data.geometry;
-    var xVertices = Math.floor( this._width / Math.pow(4,this._currentGeometryDistanceIndex) );
-    var zVertices = Math.floor( this._depth / Math.pow(4,this._currentGeometryDistanceIndex) );
+  updateChunkGeometry: function (distanceIndex, xVertices, zVertices, xOffset, zOffset, vertices) {
+
     var newGeometry = new THREE.PlaneGeometry(
       this._width,
       this._depth,
@@ -94,29 +91,29 @@ THREE.DynamicTerrainMapChunk.prototype = {
       zVertices - 1
     );
     newGeometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
-    newGeometry.vertices = e.data.geometry.vertices;
+    newGeometry.vertices = vertices;
 
-    if( self._mesh != null ) {
-      scene.remove(self._mesh);
-      delete self._mesh;
-      delete self._geometry;
+    if( this._mesh != null ) {
+      this._scene.remove(this._mesh);
+      delete this._mesh;
+      delete this._geometry;
     }
 
-    self._geometry = newGeometry;
-    self._mesh = new THREE.Mesh(
-      self._geometry,
-      self._material
+    this._geometry = newGeometry;
+    this._mesh = new THREE.Mesh(
+      this._geometry,
+      this._material
     );
 
-    self._mesh.position.set(self._position.x,self._position.y,self._position.z);
-    self._scene.add(self._mesh);
+    this._mesh.position.set(this._position.x + xOffset,this._position.y,this._position.z + zOffset);
+    this._scene.add(this._mesh);
 
-    self._updating = false;
+    this._updating = false;
   },
 
   // Check if we need to redraw 
   checkGeometry: function() {
-    if( ! this._currentGeometryDistance ||
+    if( this._currentGeometryDistance == null ||
         ! this._updating ) {
       var index = this._geometryDistanceIndex();
       if( this._camera.position.y <= THREE.DynamicTerrainMapChunk.detailRanges[0] &&
@@ -128,9 +125,8 @@ THREE.DynamicTerrainMapChunk.prototype = {
         ) ) {
         this._currentGeometryDistanceIndex = 0;
       }
-      //console.log('CHUNK AT '+this._position.x+','+this._position.y+','+this._position.z+' : '+this._currentGeometryDistanceIndex);
       if( index != this._currentGeometryDistanceIndex ) {
-        this._currentGeometryDistanceIndex  = index;
+        this._currentGeometryDistanceIndex = index;
         this._updateGeometry();
       }
     }
@@ -152,24 +148,64 @@ THREE.DynamicTerrainMapChunk.prototype = {
       }
       return;
     }
-    console.log('SENDING '+this._position.x+','+this._position.z);
-    if( this._chunkWorkerReady ) {
-      this._chunkWorker.postMessage({
-        currentGeometryDistanceIndex: this._currentGeometryDistanceIndex,
-        width: this._width,
-        depth: this._depth,
-        heightMap: this._heightMap,
-        heightMapWidth: this._heightMapWidth,
-        heightMapWidthZero: this._heightMapWidthZero,
-        heightMapDepthZero: this._heightMapDepthZero
-      });
+
+    // Send our request to the chunk builder.
+      //this._buildChunkGeometry(this._mapIndex, this._currentGeometryDistanceIndex);
+    if( this._useWorkers ) {
+      this._buildChunkGeometry(
+        this._mapIndex, 
+        this._currentGeometryDistanceIndex,
+        this._heightMapWidthZero, 
+        this._heightMapDepthZero, 
+        this._width, 
+        this._depth);
     } else {
       var xVertices = Math.floor( this._width / Math.pow(4,this._currentGeometryDistanceIndex) );
       var zVertices = Math.floor( this._depth / Math.pow(4,this._currentGeometryDistanceIndex) );
 
+      // THIS WORKS!
+      // if( this._currentGeometryDistanceIndex >= THREE.DynamicTerrainMapChunk.detailRanges.length ) {
+      //   xVertices = 2;
+      //   zVertices = 2;
+      // }
+
+      // Cheap rigging for overlapping
+      var geoWidth = this._width;
+      var geoDepth = this._depth;
+      var startWidth = this._heightMapWidthZero;
+      var startDepth = this._heightMapDepthZero;
+      var xOffset = 0;
+      var zOffset = 0;
+      var geoIncrement = Math.pow(4,this._currentGeometryDistanceIndex);
+      
+      if( this._heightMapWidthZero != 0 ) {
+        geoWidth += geoIncrement;
+        xVertices++;
+        xOffset -= geoIncrement / 2;
+        startWidth -= geoIncrement;
+      }
+      if( ( this._heightMapWidthZero + this._width + geoIncrement ) < this._heightMapWidth ) {
+        geoWidth += geoIncrement;
+        xVertices++;
+        xOffset += geoIncrement / 2;
+      }
+      if( this._heightMapDepthZero != 0 ) {
+        geoDepth += geoIncrement;
+        zVertices++;
+        zOffset -= geoIncrement / 2;
+        startDepth -= geoIncrement;
+      }
+      if( ( this._heightMapDepthZero + this._depth + geoIncrement ) < this._heightMapDepth ) {
+        geoDepth += geoIncrement;
+        zVertices++;
+        zOffset += geoIncrement / 2;
+      }
+      
+
+
       var newGeometry = new THREE.PlaneGeometry(
-        this._width,
-        this._depth,
+        geoWidth,
+        geoDepth,
         xVertices - 1,
         zVertices - 1
       );
@@ -181,12 +217,9 @@ THREE.DynamicTerrainMapChunk.prototype = {
       for( var i = 0; i < newGeometry.vertices.length; i++ ) {
         z = Math.floor( i / xVertices );
         x = i - z * xVertices;
-        z = z * ( this._depth / Math.floor( this._depth / Math.pow(4,this._currentGeometryDistanceIndex) ) );
-        x = x * ( this._width / Math.floor( this._width / Math.pow(4,this._currentGeometryDistanceIndex) ) );
-        if( this._currentGeometryDistanceIndex >= 1 && this._position.x == 50 && this._position.z == 50 ) {
-          console.log('POINT '+x+','+z);
-        }
-        newGeometry.vertices[i].y = this._heightMap[this._getHeightMapArrayPosition(this._heightMapWidthZero + x, this._heightMapDepthZero + z)];
+        z = z * ( geoDepth / Math.floor( geoDepth / Math.pow(4,this._currentGeometryDistanceIndex) ) );
+        x = x * ( geoWidth / Math.floor( geoWidth / Math.pow(4,this._currentGeometryDistanceIndex) ) );
+        newGeometry.vertices[i].y = ( 1 / Math.pow(4,this._currentGeometryDistanceIndex) ) + this._heightMap[this._getHeightMapArrayPosition(Math.floor(startWidth + x), Math.floor(startDepth + z))];
       }
       
       if( this._mesh != null ) {
@@ -201,7 +234,7 @@ THREE.DynamicTerrainMapChunk.prototype = {
         this._material
       );
 
-      this._mesh.position.set(this._position.x,this._position.y,this._position.z);
+      this._mesh.position.set(this._position.x + xOffset,this._position.y,this._position.z + zOffset);
       this._scene.add(this._mesh);
 
       this._updating = false;
