@@ -3,46 +3,16 @@
  * Useful for testing mostly.
  */
 
-THREE.GenericTerrainMaterial = function (parameters) {
+THREE.GenericWaterMaterial = function (parameters) {
 	if( typeof parameters == "undefined" ) {
 		parameters = {};
 	}
 
-	// As a parameter later on.
-	this._textures = [];
-	this._textures.push({
-		label: 'dirt',
-		url: 'resources/textures/reality/grass-and-rock.png',
-		start: 0 // Flag
-	});
-
-	this._textures.push({
-		label: 'grass',
-		url: 'resources/textures/reality/grass.png',
-		start: 100,
-		delta: 90
-	});
-
-	this._textures.push({
-		label: 'rock',
-		url: 'resources/textures/reality/rock.png',
-		start: 150,
-		delta: 15
-	});
-
-	this._textures.push({
-		label: 'snow',
-		url: 'resources/textures/reality/snow.png',
-		start: 190,
-		delta: 45
-	});
-
-	this._textureRepeat = parameters.textureRepeat ? parameters.textureRepeat : 10;
-
-	this._mixHeight = 10;
+	this._color = parameters.color.toString ? parameters.color : 0x336699;
+	this._opacity = parameters.opacity.toString ? parameters.opacity : 1.0;
 }
 
-THREE.GenericTerrainMaterial.prototype._fragmentShader = function () {
+THREE.GenericWaterMaterial.prototype._fragmentShader = function () {
 	var shader = [];
 	shader.push('varying vec2 vUv;');
 	shader.push('varying vec3 vPosition;');
@@ -75,15 +45,17 @@ THREE.GenericTerrainMaterial.prototype._fragmentShader = function () {
 THREE.GenericTerrainMaterial.prototype._vertexShader = function () {
 	var shader = [];
 
+	shader.push("attribute float displacement;");
+	shader.push("varying float vDisplacement;");
 	shader.push("varying vec2 vUv;");
 	shader.push("varying vec3 vPosition;");
-	shader.push("uniform float textureRepeat;");
 	shader.push("void main( void ) {");
-	shader.push("vUv = uv * textureRepeat;");
+	shader.push("vDisplacement = displacement;");
+	shader.push("vUv = uv;");
 	shader.push("vPosition = position;");
 	shader.push("gl_Position = projectionMatrix * modelViewMatrix * vec4(vPosition, 1);");
 	shader.push("}");
-
+	
 	return shader.join("\n");
 }
 
@@ -108,7 +80,6 @@ THREE.GenericTerrainMaterial.prototype.generateMaterial = function () {
 	return new THREE.ShaderMaterial({
 		uniforms: uniforms,
 		vertexShader: this._vertexShader(),
-		fragmentShader: this._fragmentShader(),
-		shading: THREE.SmoothShading
+		fragmentShader: this._fragmentShader()
 	});
 }

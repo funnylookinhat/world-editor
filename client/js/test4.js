@@ -23,7 +23,7 @@ renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 renderer.autoClearColor = false;
 
 
-var cameraDelta = -0.05;
+var cameraDelta = -0.5;
 
 var terrainmesh;
 
@@ -88,12 +88,11 @@ function render() {
 	//terrainMap._geometry.verticesNeedUpdate = true;
 	
 
-	terrainMap._geometry.attributes.position.needsUpdate = true;
-	terrainMap._geometry.attributes.index.needsUpdate = true;
-	terrainMap._geometry.attributes.normal.needsUpdate = true;
-	terrainMap._geometry.attributes.uv.needsUpdate = true;
-
-	terrainMap._geometry.computeBoundingSphere();
+	//terrainMap._geometry.attributes.position.needsUpdate = true;
+	//terrainMap._geometry.attributes.index.needsUpdate = true;
+	//terrainMap._geometry.attributes.normal.needsUpdate = true;
+	//terrainMap._geometry.attributes.uv.needsUpdate = true;
+	//terrainMap._geometry.computeBoundingSphere();
 	a += 0.01;
 	
 }
@@ -150,8 +149,8 @@ window.requestAnimFrame = (function(){
 
 // Start
 var terrainMap = new THREE.TerrainMap({
-	width: 3000,
-	depth: 3000
+	width: 800,
+	depth: 800
 });
 terrainMap.initFlat(init);
 //terrainMap.initWithImage("/storage/height-test-small.png",[0.1,0.1,0.1,0.1],init);

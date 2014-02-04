@@ -166,7 +166,7 @@ THREE.DynamicTerrainMap.prototype = {
             r * 1 + // Math.pow(255,0) +
             g * 1 + // Math.pow(255,1) +
             b * 1 + // 1 + // Math.pow(255,2) +
-            a * 1 // Math.pow(255,3)
+            a * 0 // Math.pow(255,3)
           );
       }
       self._generateMap(callback);

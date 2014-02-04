@@ -13,7 +13,7 @@ var camera = new THREE.PerspectiveCamera(
   45,
   SCREEN_WIDTH / SCREEN_HEIGHT,
   1,
-  1000
+  2500
 );
 
 
@@ -29,7 +29,7 @@ renderer.autoClearColor = false;
 
 var cameraShift = 0;
 var cameraCheck = false;
-var cameraDelta = 1.0;//-0.5;
+var cameraDelta = 2.0;//-0.5;
 var cameraY = 200;
 
 var cameraCycle = 1;
@@ -37,6 +37,9 @@ var cameraAngle = 0;
 
 var a = 0.01;
 var time;
+
+var water;
+
 function render() {
   
   cameraShift += Math.abs(cameraDelta*2);
@@ -51,6 +54,8 @@ function render() {
   camera.position.x += cameraDelta;
   camera.position.z += cameraDelta;
   camera.position.y = cameraY;
+
+  water.material.uniforms.time.value = ( ( new Date().getTime() / 1000 ) % 10 );
 
   if( cameraCycle == 1 ) {
     if( camera.position.x < ( -0.5 * terrainMap.width() &&
@@ -138,31 +143,39 @@ terrainMap.init({
   scene: scene,
   camera: camera,
   material: material,
-  imageUrl: 'storage/height-test-3700x3800.png',
-  imageScale: 0.5,
-  flatWidth: 2500,	
-  flatDepth: 2500,
+  imageUrl: 'storage/height-test-4700.png',
+  imageScale: 1.0,
+  flatWidth: 5000,	
+  flatDepth: 5000,
   position: {x: 0, y: 0, z: 0},
-  debugMode: true,
+  debugMode: false,
   useWorkers: useWorkers ? true : false
 },init);
 
 
-var fullAreaGeometry = new THREE.PlaneGeometry(
-  2500,
-  2500,
-  2,
-  2
+var waterGeometry = new THREE.PlaneGeometry( 5000, 5000, 2, 2 );
+waterGeometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
+for( var i = 0; i < waterGeometry.vertices.length; i++ ) {
+  waterGeometry.vertices[i].y = 0.5;
+}
+water = new THREE.Mesh(
+	waterGeometry,
+	new THREE.ShaderMaterial({
+		uniforms: {
+			time: { type: 'f', value: 0 }
+		},
+		attributes: {
+			displacement: { type: 'f', value: [] }
+		},
+		vertexShader: document.getElementById( 'waterVertexShader' ).textContent,
+		fragmentShader: document.getElementById( 'waterFragmentShader' ).textContent,
+		transparent: true
+	})
 );
-fullAreaGeometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
-var fullAreaMesh = new THREE.Mesh(
-  fullAreaGeometry,
-  new THREE.MeshBasicMaterial({
-    color: 0x999999,
-    wireframe: true
-  })
-);
-scene.add(fullAreaMesh);
+
+water.dynamic = true;
+water.position.set(0,0,1);
+scene.add(water);
 
 //terrainMap.initWithImage("/storage/height-test-small.png",[0.1,0.1,0.1,0.1],init);
 

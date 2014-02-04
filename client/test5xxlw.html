@@ -1,0 +1,61 @@
+<html>
+	<head>
+		<title>World Editor Client</title>
+		<link href="css/world-editor.css" rel="stylesheet" type="text/css" />
+	</head>
+	<body>
+
+		<script id="waterVertexShader" type="x-shader/x-fragment">
+			
+			uniform float time;
+
+			varying vec2 vUv;
+			varying vec3 vPosition;
+
+			void main( void ) {
+				
+				vUv = uv;
+				vPosition = position;
+				
+				vPosition.y = vPosition.y + 2.0 + 0.5 * sin(radians(( time / 2.0 * 3.1415 ) * vPosition.x / 20.0)) + 0.7 * cos(radians(( time / 2.0 * 3.1415 ) * vPosition.z / 30.0));
+
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(vPosition, 1);
+				
+			}
+			
+		</script>
+
+		<script id="waterFragmentShader" type="x-shader/x-vertex">
+			
+			varying vec2 vUv;
+			varying vec3 vPosition;
+			
+			void main()
+			{
+				
+
+
+				// Base Color
+				gl_FragColor = vec4(51.0/255.0, 102.0/255.0, (153.0 + vPosition.y * 10.0)/255.0, .7);
+				
+				// CHANGE THIS
+				// So that vPosition y changes the brightness of the color and shimmer?
+
+				// float val = sin(radians(something / 1.0))
+			}
+
+		</script>
+
+		<div id="render"></div>
+		<script type="text/javascript"> var useWorkers = true; </script>
+		<script type="text/javascript" src="js/includes/jquery.min.js"></script>
+		<script type="text/javascript" src="js/includes/three.min.js"></script>
+		<script type="text/javascript" src="js/includes/stats.min.js"></script>
+		<!-- Other Includes -->
+		<script type="text/javascript" src="js/DynamicTerrainMapChunk.js"></script>
+		<script type="text/javascript" src="js/DynamicTerrainMapChunkBuilder.js"></script>
+		<script type="text/javascript" src="js/DynamicTerrainMap.js"></script>
+		<script type="text/javascript" src="js/GenericTerrainMaterial.js"></script>
+		<script type="text/javascript" src="js/test5xxlw.js"></script>
+	</body>
+</html>

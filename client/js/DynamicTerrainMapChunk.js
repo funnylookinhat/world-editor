@@ -29,8 +29,9 @@ THREE.DynamicTerrainMapChunk = function () {
 
 THREE.DynamicTerrainMapChunk.detailRanges = [
 	150,
-  250,
-  1000
+  500,
+  2000,
+  5000
 ];
 
 THREE.DynamicTerrainMapChunk.prototype = {
